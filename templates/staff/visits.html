@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Visits{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-calendar-check"></i> Home Visits</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Schedule New Visit</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('staff.add_visit') }}">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Parent</label>
+                    <select class="form-select" name="parent_id" required>
+                        <option value="">Select Parent</option>
+                        {% for parent in assigned_parents %}
+                        <option value="{{ parent.id }}">{{ parent.name }} ({{ parent.parent_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Visit Date</label>
+                    <input type="date" class="form-control" name="visit_date" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Remarks</label>
+                    <input type="text" class="form-control" name="remarks">
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">Schedule</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="mb-3">
+    <a href="{{ url_for('staff.view_visits', status='all') }}" class="btn btn-sm btn-outline-primary">All</a>
+    <a href="{{ url_for('staff.view_visits', status='scheduled') }}" class="btn btn-sm btn-outline-warning">Scheduled</a>
+    <a href="{{ url_for('staff.view_visits', status='completed') }}" class="btn btn-sm btn-outline-success">Completed</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Parent</th>
+                        <th>Visit Date</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for visit in visits %}
+                    <tr>
+                        <td>{{ visit.parent.name }} ({{ visit.parent.parent_id }})</td>
+                        <td>{{ visit.visit_date.strftime('%Y-%m-%d') }}</td>
+                        <td><span class="badge bg-{{ 'success' if visit.status == 'completed' else 'warning' }}">{{ visit.status }}</span></td>
+                        <td>{{ visit.remarks or '-' }}</td>
+                        <td>
+                            {% if visit.status == 'scheduled' %}
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#completeModal{{ visit.id }}">Complete</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% for visit in visits %}
+{% if visit.status == 'scheduled' %}
+<div class="modal fade" id="completeModal{{ visit.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Complete Visit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('staff.complete_visit', visit_id=visit.id) }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Remarks</label>
+                        <textarea class="form-control" name="remarks" rows="3">{{ visit.remarks or '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Photos (Optional)</label>
+                        <input type="file" class="form-control" name="photos" multiple accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Mark Complete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}
+

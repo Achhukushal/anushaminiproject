@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Uploads{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-upload"></i> Document Uploads</h2>
+
+<div class="mb-3">
+    <a href="{{ url_for('staff.view_uploads', status='all') }}" class="btn btn-sm btn-outline-primary">All</a>
+    <a href="{{ url_for('staff.view_uploads', status='pending') }}" class="btn btn-sm btn-outline-warning">Pending</a>
+    <a href="{{ url_for('staff.view_uploads', status='verified') }}" class="btn btn-sm btn-outline-success">Verified</a>
+    <a href="{{ url_for('staff.view_uploads', status='rejected') }}" class="btn btn-sm btn-outline-danger">Rejected</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Parent</th>
+                        <th>Child</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for upload in uploads %}
+                    <tr>
+                        <td><span class="badge bg-info">{{ upload.upload_type }}</span></td>
+                        <td>{{ upload.parent.name }} ({{ upload.parent.parent_id }})</td>
+                        <td>{{ upload.child.name }}</td>
+                        <td>{{ upload.upload_date.strftime('%Y-%m-%d') }}</td>
+                        <td><span class="badge bg-{{ 'success' if upload.status == 'verified' else 'danger' if upload.status == 'rejected' else 'warning' }}">{{ upload.status }}</span></td>
+                        <td>
+                            <a href="{{ url_for('static', filename='../uploads/' + upload.file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                            {% if upload.status == 'pending' %}
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#verifyModal{{ upload.id }}">Verify</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% for upload in uploads %}
+{% if upload.status == 'pending' %}
+<div class="modal fade" id="verifyModal{{ upload.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Verify Upload</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('staff.verify_upload', upload_id=upload.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Action</label>
+                        <select class="form-select" name="action" required>
+                            <option value="approve">Approve</option>
+                            <option value="reject">Reject</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Feedback</label>
+                        <textarea class="form-control" name="feedback" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}
+

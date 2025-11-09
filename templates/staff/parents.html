@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Assigned Parents{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-people-fill"></i> Assigned Parents</h2>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Parent ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for parent in parents %}
+                    <tr>
+                        <td><strong>{{ parent.parent_id }}</strong></td>
+                        <td>{{ parent.name }}</td>
+                        <td>{{ parent.email }}</td>
+                        <td>{{ parent.phone or '-' }}</td>
+                        <td>{{ parent.address[:50] + '...' if parent.address and parent.address|length > 50 else (parent.address or '-') }}</td>
+                        <td>
+                            <a href="{{ url_for('staff.view_parent_detail', parent_id=parent.id) }}" class="btn btn-sm btn-primary">View Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Children{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-heart"></i> Manage Children</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Add Child Record</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('admin.add_child') }}">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Parent</label>
+                    <select class="form-select" name="parent_id" required>
+                        <option value="">Select Parent</option>
+                        {% for parent in parents %}
+                        <option value="{{ parent.id }}">{{ parent.name }} ({{ parent.parent_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Child Name</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" name="dob">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Gender</label>
+                    <select class="form-select" name="gender">
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Adoption Date</label>
+                    <input type="date" class="form-control" name="adoption_date">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <label class="form-label">Background Info</label>
+                    <textarea class="form-control" name="background_info" rows="2"></textarea>
+                </div>
+                <div class="col-md-2 mt-3">
+                    <button type="submit" class="btn btn-primary">Add Child</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Children Records</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Parent</th>
+                        <th>DOB</th>
+                        <th>Gender</th>
+                        <th>Adoption Date</th>
+                        <th>Background</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for child in children %}
+                    <tr>
+                        <td><strong>{{ child.name }}</strong></td>
+                        <td>{{ child.parent.name }} ({{ child.parent.parent_id }})</td>
+                        <td>{{ child.dob.strftime('%Y-%m-%d') if child.dob else '-' }}</td>
+                        <td>{{ child.gender or '-' }}</td>
+                        <td>{{ child.adoption_date.strftime('%Y-%m-%d') if child.adoption_date else '-' }}</td>
+                        <td>{{ child.background_info[:50] + '...' if child.background_info and child.background_info|length > 50 else (child.background_info or '-') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

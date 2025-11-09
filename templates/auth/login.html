@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Adoption System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <h2 class="card-title text-center mb-4">
+                    <i class="bi bi-heart-fill text-primary"></i> Login
+                </h2>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" name="role" id="role" required>
+                            <option value="">Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="staff">Staff</option>
+                            <option value="parent">Parent</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="emailField">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+
+                    <div class="mb-3" id="staffIdField" style="display: none;">
+                        <label class="form-label">Staff ID</label>
+                        <input type="text" class="form-control" name="staff_id" placeholder="Enter your Staff ID">
+                    </div>
+
+                    <div class="mb-3" id="parentIdField" style="display: none;">
+                        <label class="form-label">Parent ID</label>
+                        <input type="text" class="form-control" name="parent_id" placeholder="Enter your Parent ID">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+                </form>
+
+                <div class="text-center">
+                    <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register as Parent</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('role').addEventListener('change', function() {
+    const role = this.value;
+    const emailField = document.getElementById('emailField');
+    const staffIdField = document.getElementById('staffIdField');
+    const parentIdField = document.getElementById('parentIdField');
+    
+    emailField.style.display = 'block';
+    staffIdField.style.display = 'none';
+    parentIdField.style.display = 'none';
+    
+    if (role === 'staff') {
+        emailField.style.display = 'none';
+        staffIdField.style.display = 'block';
+    } else if (role === 'parent') {
+        emailField.style.display = 'none';
+        parentIdField.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}
+

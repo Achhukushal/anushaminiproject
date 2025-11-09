@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Parent Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Parent Dashboard</h2>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">My Children</h5>
+                <h2>{{ children|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Verified Uploads</h5>
+                <h2>{{ verified_uploads }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Pending Uploads</h5>
+                <h2>{{ pending_uploads }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Upcoming Visits</h5>
+                <h2>{{ upcoming_visits|length }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>My Children</h5>
+            </div>
+            <div class="card-body">
+                {% for child in children %}
+                <div class="mb-3 p-3 border rounded">
+                    <h6>{{ child.name }}</h6>
+                    <p class="mb-1"><small>DOB: {{ child.dob.strftime('%Y-%m-%d') if child.dob else 'N/A' }}</small></p>
+                    <p class="mb-1"><small>Gender: {{ child.gender or 'N/A' }}</small></p>
+                    <p class="mb-0"><small>Adoption Date: {{ child.adoption_date.strftime('%Y-%m-%d') if child.adoption_date else 'N/A' }}</small></p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Recent Uploads</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Child</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for upload in recent_uploads %}
+                            <tr>
+                                <td>{{ upload.upload_type }}</td>
+                                <td>{{ upload.child.name }}</td>
+                                <td><span class="badge bg-{{ 'success' if upload.status == 'verified' else 'danger' if upload.status == 'rejected' else 'warning' }}">{{ upload.status }}</span></td>
+                                <td>{{ upload.upload_date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

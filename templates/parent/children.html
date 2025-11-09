@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}My Children{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-heart"></i> My Children</h2>
+
+<div class="row">
+    {% for child in children %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>{{ child.name }}</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Date of Birth:</strong> {{ child.dob.strftime('%Y-%m-%d') if child.dob else 'N/A' }}</p>
+                <p><strong>Gender:</strong> {{ child.gender or 'N/A' }}</p>
+                <p><strong>Adoption Date:</strong> {{ child.adoption_date.strftime('%Y-%m-%d') if child.adoption_date else 'N/A' }}</p>
+                {% if child.background_info %}
+                <p><strong>Background:</strong> {{ child.background_info }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+

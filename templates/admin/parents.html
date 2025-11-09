@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Parents{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-person-heart"></i> Manage Parents</h2>
+
+<div class="mb-3">
+    <a href="{{ url_for('admin.manage_parents', status='all') }}" class="btn btn-sm btn-outline-primary">All</a>
+    <a href="{{ url_for('admin.manage_parents', status='pending') }}" class="btn btn-sm btn-outline-warning">Pending</a>
+    <a href="{{ url_for('admin.manage_parents', status='approved') }}" class="btn btn-sm btn-outline-success">Approved</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Parent ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th>Assigned Staff</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for parent in parents %}
+                    <tr>
+                        <td><strong>{{ parent.parent_id or '-' }}</strong></td>
+                        <td>{{ parent.name }}</td>
+                        <td>{{ parent.email }}</td>
+                        <td>{{ parent.phone or '-' }}</td>
+                        <td>{{ parent.address[:50] + '...' if parent.address and parent.address|length > 50 else (parent.address or '-') }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if parent.status == 'approved' else 'warning' if parent.status == 'pending' else 'danger' }}">
+                                {{ parent.status }}
+                            </span>
+                        </td>
+                        <td>{{ parent.mentor.staff_id if parent.mentor else '-' }}</td>
+                        <td>
+                            {% if parent.status == 'pending' %}
+                            <form method="POST" action="{{ url_for('admin.approve_parent', parent_id=parent.id) }}" style="display: inline-block;">
+                                <select name="staff_id" class="form-select form-select-sm d-inline-block" style="width: auto;" required>
+                                    <option value="">Select Staff</option>
+                                    {% for staff in staff_list %}
+                                    <option value="{{ staff.id }}" {% if staff.assigned_parent_count >= staff.max_parents %}disabled{% endif %}>
+                                        {{ staff.staff_id }} - {{ staff.name }} ({{ staff.assigned_parent_count }}/{{ staff.max_parents }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.reject_parent', parent_id=parent.id) }}" style="display: inline-block;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Reject this parent?');">Reject</button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Guidance{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-book"></i> Adoption Guidance</h2>
+
+<div class="row">
+    {% for guidance in guidance_list %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>{{ guidance.title }}</h5>
+                <span class="badge bg-info">{{ guidance.category }}</span>
+            </div>
+            <div class="card-body">
+                <p>{{ guidance.description or 'No description available.' }}</p>
+                {% if guidance.file_url %}
+                <a href="{{ url_for('static', filename='../uploads/' + guidance.file_url) }}" target="_blank" class="btn btn-sm btn-primary">View Document</a>
+                {% endif %}
+                <small class="text-muted d-block mt-2">Published: {{ guidance.created_at.strftime('%Y-%m-%d') }}</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+

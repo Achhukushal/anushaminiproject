@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Uploads{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-upload"></i> Document Uploads</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Upload New Document</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Child</label>
+                    <select class="form-select" name="child_id" required>
+                        <option value="">Select Child</option>
+                        {% for child in children %}
+                        <option value="{{ child.id }}">{{ child.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Document Type</label>
+                    <select class="form-select" name="upload_type" required>
+                        <option value="">Select Type</option>
+                        <option value="health">Health Check-up</option>
+                        <option value="vaccination">Vaccination Update</option>
+                        <option value="school">School Progress Report</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">File</label>
+                    <input type="file" class="form-control" name="file" accept=".pdf,.jpg,.jpeg,.png" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">Upload</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Upload History</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Child</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Feedback</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for upload in uploads %}
+                    <tr>
+                        <td><span class="badge bg-info">{{ upload.upload_type }}</span></td>
+                        <td>{{ upload.child.name }}</td>
+                        <td>{{ upload.upload_date.strftime('%Y-%m-%d') }}</td>
+                        <td><span class="badge bg-{{ 'success' if upload.status == 'verified' else 'danger' if upload.status == 'rejected' else 'warning' }}">{{ upload.status }}</span></td>
+                        <td>{{ upload.feedback or '-' }}</td>
+                        <td>
+                            <a href="{{ url_for('static', filename='../uploads/' + upload.file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
