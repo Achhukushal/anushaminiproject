@@ -1,17 +1,17 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from models import User, Child, Upload, Visit, Guidance, db
-from datetime import datetime, timedelta
+from datetime import datetime
+from sqlalchemy import func
 import os
 import json
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
-
-from models import db, User, Child, Upload, Visit, Guidance
-
 
 parent_bp = Blueprint('parent', __name__)
 
+# --------------------------
+# Access Control
+# --------------------------
 def parent_required(f):
     from functools import wraps
     @wraps(f)
@@ -22,6 +22,9 @@ def parent_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# --------------------------
+# Dashboard
+# --------------------------
 @parent_bp.route('/dashboard')
 @login_required
 @parent_required
@@ -29,24 +32,36 @@ def dashboard():
     if current_user.status != 'approved':
         flash('Your account is pending approval. Please wait for admin approval.', 'warning')
         return render_template('parent/pending.html')
-    
+
     children = Child.query.filter_by(parent_id=current_user.id).all()
     recent_uploads = Upload.query.filter_by(parent_id=current_user.id).order_by(Upload.upload_date.desc()).limit(5).all()
-    upcoming_visits = Visit.query.filter_by(
-        parent_id=current_user.id,
-        status='scheduled'
-    ).filter(Visit.visit_date >= datetime.now().date()).all()
-    
+
+    # ✅ FIXED: Use func.date() to ensure datetime comparison works
+    today = datetime.now().date()
+    upcoming_visits = Visit.query.filter(
+        Visit.parent_id == current_user.id,
+        Visit.status == 'scheduled',
+        func.date(Visit.visit_date) >= today
+    ).order_by(Visit.visit_date.asc()).limit(5).all()
+
     pending_uploads = Upload.query.filter_by(parent_id=current_user.id, status='pending').count()
     verified_uploads = Upload.query.filter_by(parent_id=current_user.id, status='verified').count()
-    
-    return render_template('parent/dashboard.html',
-                         children=children,
-                         recent_uploads=recent_uploads,
-                         upcoming_visits=upcoming_visits,
-                         pending_uploads=pending_uploads,
-                         verified_uploads=verified_uploads)
 
+    # Debug info (safe to remove after testing)
+    print("DEBUG Upcoming Visits:", [(v.id, v.parent_id, v.visit_date, v.status) for v in upcoming_visits])
+
+    return render_template(
+        'parent/dashboard.html',
+        children=children,
+        recent_uploads=recent_uploads,
+        upcoming_visits=upcoming_visits,
+        pending_uploads=pending_uploads,
+        verified_uploads=verified_uploads
+    )
+
+# --------------------------
+# Children
+# --------------------------
 @parent_bp.route('/children')
 @login_required
 @parent_required
@@ -58,6 +73,9 @@ def view_children():
     children = Child.query.filter_by(parent_id=current_user.id).all()
     return render_template('parent/children.html', children=children)
 
+# --------------------------
+# Upload Documents
+# --------------------------
 @parent_bp.route('/uploads', methods=['GET', 'POST'])
 @login_required
 @parent_required
@@ -81,10 +99,8 @@ def manage_uploads():
             return redirect(url_for('parent.manage_uploads'))
         
         filename = secure_filename(file.filename)
-
-        # ✅ Use current_app.config here instead of app.config
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'documents', filename)
-
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         file.save(file_path)
         
         upload = Upload(
@@ -105,7 +121,9 @@ def manage_uploads():
     uploads = Upload.query.filter_by(parent_id=current_user.id).order_by(Upload.upload_date.desc()).all()
     return render_template('parent/uploads.html', children=children, uploads=uploads)
 
-
+# --------------------------
+# Visits
+# --------------------------
 @parent_bp.route('/visits')
 @login_required
 @parent_required
@@ -117,6 +135,9 @@ def view_visits():
     visits = Visit.query.filter_by(parent_id=current_user.id).order_by(Visit.visit_date.desc()).all()
     return render_template('parent/visits.html', visits=visits)
 
+# --------------------------
+# Guidance
+# --------------------------
 @parent_bp.route('/guidance')
 @login_required
 @parent_required
@@ -124,6 +145,9 @@ def view_guidance():
     guidance_list = Guidance.query.order_by(Guidance.created_at.desc()).all()
     return render_template('parent/guidance.html', guidance_list=guidance_list)
 
+# --------------------------
+# Profile
+# --------------------------
 @parent_bp.route('/profile')
 @login_required
 @parent_required
@@ -141,4 +165,3 @@ def update_profile():
     db.session.commit()
     flash('Profile updated successfully.', 'success')
     return redirect(url_for('parent.profile'))
-

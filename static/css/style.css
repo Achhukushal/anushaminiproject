@@ -16,7 +16,7 @@ body {
 }
 
 .card-header {
-    background-color: #f8f9fa;
+    background-color: #f8f9fab1;
     border-bottom: 2px solid #dee2e6;
     font-weight: 600;
 }
@@ -60,6 +60,6 @@ body {
 }
 
 .bg-primary {
-    background-color: #0d6efd !important;
+    background-color: #238ca4 !important;
 }
 

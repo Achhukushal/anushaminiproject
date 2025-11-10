@@ -190,13 +190,12 @@ def add_visit():
         return redirect(url_for('staff.view_visits'))
     
     visit = Visit(
-        parent_id=parent.id,
-        staff_id=staff.id,
-        visit_date=datetime.strptime(visit_date, '%Y-%m-%d').date(),
-        scheduled_date=datetime.strptime(visit_date, '%Y-%m-%d').date(),
-        remarks=remarks,
-        status='scheduled'
-    )
+    parent_id=parent.id,  # must be numeric user ID
+    staff_id=staff.id,
+    visit_date=datetime.strptime(visit_date, '%Y-%m-%d').date(),
+    remarks=remarks,
+    status='scheduled'
+)
     
     db.session.add(visit)
     db.session.commit()

@@ -26,7 +26,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_staff') }}">Staff</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_parents') }}">Parents</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_children') }}">Children</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_guidance') }}">Guidance</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_guidance') }}">Guidance</a></li> -->
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.reports') }}">Reports</a></li>
                     {% elif current_user.role == 'staff' %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.dashboard') }}">Dashboard</a></li>
@@ -38,7 +38,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('parent.view_children') }}">Children</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('parent.manage_uploads') }}">Uploads</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('parent.view_visits') }}">Visits</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('parent.view_guidance') }}">Guidance</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="{{ url_for('parent.view_guidance') }}">Guidance</a></li> -->
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('parent.profile') }}">Profile</a></li>
                     {% endif %}
                 </ul>

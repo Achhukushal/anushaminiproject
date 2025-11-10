@@ -5,29 +5,50 @@
 {% block content %}
 <h2 class="mb-4"><i class="bi bi-calendar-check"></i> Home Visits</h2>
 
-<div class="card">
+<div class="card shadow-sm">
     <div class="card-body">
+        {% if visits %}
         <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
+            <table class="table table-striped align-middle">
+                <thead class="table-light">
                     <tr>
-                        <th>Visit Date</th>
-                        <th>Status</th>
-                        <th>Remarks</th>
+                        <th scope="col">Visit Date</th>
+                        <th scope="col">Staff</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for visit in visits %}
                     <tr>
-                        <td>{{ visit.visit_date.strftime('%Y-%m-%d') }}</td>
-                        <td><span class="badge bg-{{ 'success' if visit.status == 'completed' else 'warning' }}">{{ visit.status }}</span></td>
+                        <td>
+                            {{ visit.visit_date.strftime('%Y-%m-%d') if visit.visit_date else 'N/A' }}
+                        </td>
+                        <td>
+                            {% if visit.staff %}
+                                {{ visit.staff.name }}
+                            {% else %}
+                                <span class="text-muted">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 
+                                'success' if visit.status == 'completed' 
+                                else 'warning' if visit.status == 'scheduled'
+                                else 'secondary'
+                            }}">
+                                {{ visit.status|capitalize }}
+                            </span>
+                        </td>
                         <td>{{ visit.remarks or '-' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <p class="text-center text-muted mb-0">No home visits have been scheduled yet.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
-
