@@ -133,7 +133,7 @@ def approve_parent(parent_id):
         flash(f'Staff {staff.staff_id} has reached maximum parent limit ({staff.max_parents}).', 'danger')
         return redirect(url_for('admin.manage_parents', status='pending'))
     
-    # Generate unique parent ID
+    # ✅ Ensure parent_id column exists and assign unique Parent ID
     import random
     import string
     parent_id_str = 'PAR' + ''.join(random.choices(string.digits, k=6))
@@ -143,12 +143,15 @@ def approve_parent(parent_id):
     parent.status = 'approved'
     parent.parent_id = parent_id_str
     parent.staff_id = staff.id
-    staff.assigned_parent_count += 1
     
+    # ✅ Safely increment staff count
+    staff.assigned_parent_count = getattr(staff, 'assigned_parent_count', 0) + 1
+
     db.session.commit()
     
-    flash(f'Parent approved and assigned to staff {staff.staff_id}. Parent ID: {parent_id_str}', 'success')
+    flash(f'✅ Parent "{parent.name}" approved successfully and assigned to staff {staff.staff_id}. Parent ID: {parent_id_str}', 'success')
     return redirect(url_for('admin.manage_parents', status='pending'))
+
 
 @admin_bp.route('/parents/<int:parent_id>/reject', methods=['POST'])
 @login_required

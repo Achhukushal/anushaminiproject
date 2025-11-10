@@ -16,7 +16,8 @@ class User(UserMixin, db.Model):
     phone = db.Column(db.String(20))
     role = db.Column(db.String(20), nullable=False)  # 'admin', 'staff', 'parent'
     status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'rejected'
-    parent_id = db.Column(db.String(20), unique=True)  # Unique ID assigned by admin
+    parent_id = db.Column(db.String(20), unique=True, nullable=True)
+  # Unique ID assigned by admin
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     

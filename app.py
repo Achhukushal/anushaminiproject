@@ -16,7 +16,7 @@ os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'documents'), exist_ok=Tru
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'guidance'), exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'visits'), exist_ok=True)
 
-from models import db, User, Staff, Child, Upload, Visit, Guidance
+from models import db, User,  Staff, Child, Upload, Visit, Guidance
 
 db.init_app(app)
 login_manager = LoginManager()
