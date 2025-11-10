@@ -1,18 +1,20 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from models import User, Staff, Child, Upload, Visit, db
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 import json
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models import db, User, Upload, Visit  # import your models here
+import uuid  # for unique filenames
 
+# ------------------------------
+# Blueprint Setup
+# ------------------------------
 staff_bp = Blueprint('staff', __name__)
 
-
-staff_bp = Blueprint('staff', __name__)
-
+# ------------------------------
+# Access Control Decorator
+# ------------------------------
 def staff_required(f):
     from functools import wraps
     @wraps(f)
@@ -23,11 +25,13 @@ def staff_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# ------------------------------
+# Dashboard
+# ------------------------------
 @staff_bp.route('/dashboard')
 @login_required
 @staff_required
 def dashboard():
-    # Get staff record
     staff = Staff.query.filter_by(email=current_user.email).first()
     if not staff:
         flash('Staff record not found.', 'danger')
@@ -46,13 +50,18 @@ def dashboard():
     
     recent_visits = Visit.query.filter_by(staff_id=staff.id).order_by(Visit.visit_date.desc()).limit(5).all()
     
-    return render_template('staff/dashboard.html',
-                         staff=staff,
-                         assigned_parents=assigned_parents,
-                         pending_uploads=pending_uploads,
-                         upcoming_visits=upcoming_visits,
-                         recent_visits=recent_visits)
+    return render_template(
+        'staff/dashboard.html',
+        staff=staff,
+        assigned_parents=assigned_parents,
+        pending_uploads=pending_uploads,
+        upcoming_visits=upcoming_visits,
+        recent_visits=recent_visits
+    )
 
+# ------------------------------
+# View Assigned Parents
+# ------------------------------
 @staff_bp.route('/parents')
 @login_required
 @staff_required
@@ -65,6 +74,9 @@ def view_parents():
     assigned_parents = User.query.filter_by(staff_id=staff.id, role='parent', status='approved').all()
     return render_template('staff/parents.html', parents=assigned_parents, staff=staff)
 
+# ------------------------------
+# View Individual Parent Details
+# ------------------------------
 @staff_bp.route('/parents/<int:parent_id>')
 @login_required
 @staff_required
@@ -80,12 +92,17 @@ def view_parent_detail(parent_id):
     uploads = Upload.query.filter_by(parent_id=parent.id).order_by(Upload.upload_date.desc()).all()
     visits = Visit.query.filter_by(parent_id=parent.id).order_by(Visit.visit_date.desc()).all()
     
-    return render_template('staff/parent_detail.html',
-                         parent=parent,
-                         children=children,
-                         uploads=uploads,
-                         visits=visits)
+    return render_template(
+        'staff/parent_detail.html',
+        parent=parent,
+        children=children,
+        uploads=uploads,
+        visits=visits
+    )
 
+# ------------------------------
+# View Uploads
+# ------------------------------
 @staff_bp.route('/uploads')
 @login_required
 @staff_required
@@ -100,6 +117,9 @@ def view_uploads():
     uploads = query.order_by(Upload.upload_date.desc()).all()
     return render_template('staff/uploads.html', uploads=uploads, status=status)
 
+# ------------------------------
+# Verify Uploads
+# ------------------------------
 @staff_bp.route('/uploads/<int:upload_id>/verify', methods=['POST'])
 @login_required
 @staff_required
@@ -130,6 +150,9 @@ def verify_upload(upload_id):
     db.session.commit()
     return redirect(url_for('staff.view_uploads'))
 
+# ------------------------------
+# View Visits
+# ------------------------------
 @staff_bp.route('/visits')
 @login_required
 @staff_required
@@ -149,6 +172,9 @@ def view_visits():
     assigned_parents = User.query.filter_by(staff_id=staff.id, role='parent', status='approved').all()
     return render_template('staff/visits.html', visits=visits, status=status, assigned_parents=assigned_parents)
 
+# ------------------------------
+# Add a New Visit
+# ------------------------------
 @staff_bp.route('/visits/add', methods=['POST'])
 @login_required
 @staff_required
@@ -178,6 +204,9 @@ def add_visit():
     flash('Visit scheduled successfully.', 'success')
     return redirect(url_for('staff.view_visits'))
 
+# ------------------------------
+# Complete a Visit (File Upload Fix)
+# ------------------------------
 @staff_bp.route('/visits/<int:visit_id>/complete', methods=['POST'])
 @login_required
 @staff_required
@@ -192,14 +221,14 @@ def complete_visit(visit_id):
     visit.status = 'completed'
     visit.remarks = request.form.get('remarks', visit.remarks)
     
-    # Handle photo uploads if any
     photos = []
     if 'photos' in request.files:
         files = request.files.getlist('photos')
         for file in files:
             if file and file.filename:
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'visits', filename)
+                # ✅ Safe unique filename
+                filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'visits', filename)
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 file.save(file_path)
                 photos.append(f"visits/{filename}")
@@ -210,4 +239,3 @@ def complete_visit(visit_id):
     db.session.commit()
     flash('Visit marked as completed.', 'success')
     return redirect(url_for('staff.view_visits'))
-

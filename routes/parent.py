@@ -5,7 +5,8 @@ from models import User, Child, Upload, Visit, Guidance, db
 from datetime import datetime, timedelta
 import os
 import json
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
+
 from models import db, User, Child, Upload, Visit, Guidance
 
 
@@ -80,7 +81,10 @@ def manage_uploads():
             return redirect(url_for('parent.manage_uploads'))
         
         filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'documents', filename)
+
+        # ✅ Use current_app.config here instead of app.config
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'documents', filename)
+
         file.save(file_path)
         
         upload = Upload(
@@ -100,6 +104,7 @@ def manage_uploads():
     children = Child.query.filter_by(parent_id=current_user.id).all()
     uploads = Upload.query.filter_by(parent_id=current_user.id).order_by(Upload.upload_date.desc()).all()
     return render_template('parent/uploads.html', children=children, uploads=uploads)
+
 
 @parent_bp.route('/visits')
 @login_required
