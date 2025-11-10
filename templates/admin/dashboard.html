@@ -1,128 +1,287 @@
 {% extends "base.html" %}
-
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+<div class="dark-dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h4 class="brand">AdoptLink</h4>
+    </div>
+    <ul class="nav flex-column mt-4">
+      <li class="nav-item">
+        <a class="nav-link active" href="{{ url_for('admin.dashboard') }}">
+          <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.manage_children') }}">
+          <i class="bi bi-emoji-smile"></i><span>Children</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.manage_parents') }}">
+          <i class="bi bi-people"></i><span>Parents</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.manage_staff') }}">
+          <i class="bi bi-person-badge"></i><span>Staff</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.guidance') }}">
+          <i class="bi bi-journal-text"></i><span>Guidance</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.reports') }}">
+          <i class="bi bi-bar-chart-line"></i><span>Reports</span>
+        </a>
+      </li>
+      <li class="nav-item mt-3">
+        <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+          <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body">
-                <h5 class="card-title">Total Staff</h5>
-                <h2>{{ total_staff }}</h2>
-            </div>
-        </div>
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-header">
+      <h3><i class="bi bi-speedometer2 me-2"></i> Admin Dashboard</h3>
+      <p class="text-muted mb-0">Welcome back, {{ current_user.name }}</p>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-success">
-            <div class="card-body">
-                <h5 class="card-title">Approved Parents</h5>
-                <h2>{{ total_parents }}</h2>
-            </div>
+
+    <!-- Stats Section -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+          <i class="bi bi-people-fill icon blue"></i>
+          <div>
+            <h3>{{ total_staff }}</h3>
+            <p>Total Staff</p>
+          </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning">
-            <div class="card-body">
-                <h5 class="card-title">Pending Parents</h5>
-                <h2>{{ pending_parents }}</h2>
-            </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+          <i class="bi bi-person-check icon green"></i>
+          <div>
+            <h3>{{ total_parents }}</h3>
+            <p>Approved Parents</p>
+          </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info">
-            <div class="card-body">
-                <h5 class="card-title">Total Children</h5>
-                <h2>{{ total_children }}</h2>
-            </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+          <i class="bi bi-person-dash icon orange"></i>
+          <div>
+            <h3>{{ pending_parents }}</h3>
+            <p>Pending Parents</p>
+          </div>
         </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+          <i class="bi bi-emoji-smile icon purple"></i>
+          <div>
+            <h3>{{ total_children }}</h3>
+            <p>Total Children</p>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Tables -->
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card-dark">
+          <div class="card-dark-header">
+            <h6><i class="bi bi-person-lines-fill me-2"></i>Recent Parent Registrations</h6>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle dark-table mb-0">
+              <thead>
+                <tr>
+                  <th>Name</th><th>Email</th><th>Status</th><th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for parent in recent_parents %}
+                <tr>
+                  <td>{{ parent.name }}</td>
+                  <td>{{ parent.email }}</td>
+                  <td>
+                    <span class="badge status-{{ parent.status|lower }}">{{ parent.status }}</span>
+                  </td>
+                  <td>{{ parent.created_at.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-center text-muted">No data available</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card-dark">
+          <div class="card-dark-header">
+            <h6><i class="bi bi-cloud-arrow-up me-2"></i>Recent Uploads</h6>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle dark-table mb-0">
+              <thead>
+                <tr>
+                  <th>Type</th><th>Parent</th><th>Status</th><th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for upload in recent_uploads %}
+                <tr>
+                  <td>{{ upload.upload_type }}</td>
+                  <td>{{ upload.parent.name }}</td>
+                  <td>
+                    <span class="badge status-{{ upload.status|lower }}">{{ upload.status }}</span>
+                  </td>
+                  <td>{{ upload.upload_date.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-center text-muted">No recent uploads</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Total Uploads</h5>
-                <h3>{{ total_uploads }}</h3>
-                <p class="text-muted">Pending: {{ pending_uploads }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <!-- <div class="card-body">
-                <h5 class="card-title">Upcoming Visits</h5>
-                <h3>{{ upcoming_visits }}</h3>
-            </div> -->
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5>Recent Parent Registrations</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for parent in recent_parents %}
-                            <tr>
-                                <td>{{ parent.name }}</td>
-                                <td>{{ parent.email }}</td>
-                                <td><span class="badge bg-{{ 'success' if parent.status == 'approved' else 'warning' }}">{{ parent.status }}</span></td>
-                                <td>{{ parent.created_at.strftime('%Y-%m-%d') }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5>Recent Uploads</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Parent</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for upload in recent_uploads %}
-                            <tr>
-                                <td>{{ upload.upload_type }}</td>
-                                <td>{{ upload.parent.name }}</td>
-                                <td><span class="badge bg-{{ 'success' if upload.status == 'verified' else 'warning' }}">{{ upload.status }}</span></td>
-                                <td>{{ upload.upload_date.strftime('%Y-%m-%d') }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+/* Dark Professional Dashboard Theme */
+body {
+  background: #0b0f19;
+  color: #eaeaea;
+  font-family: 'Poppins', sans-serif;
+}
+.dark-dashboard {
+  display: flex;
+  min-height: 100vh;
+}
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: #121826;
+  padding-top: 25px;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+}
+.sidebar-header {
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.brand {
+  color: #00c6ff;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.nav-link {
+  color: #a9b3c1;
+  font-weight: 500;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+}
+.nav-link i { font-size: 1.1rem; }
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(0, 198, 255, 0.1);
+  color: #00c6ff;
+}
+/* Main Content */
+.main-content {
+  margin-left: 250px;
+  flex-grow: 1;
+  padding: 30px;
+  background: linear-gradient(160deg, #0d1420 0%, #0c1018 100%);
+}
+.content-header h3 { color: #00c6ff; }
+/* Stat Cards */
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.3s ease;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,255,255,0.15);
+}
+.stat-card h3 { color: #fff; margin: 0; }
+.stat-card p { color: #a0a7b5; margin: 0; font-size: 0.9rem; }
+.icon { font-size: 2rem; }
+.icon.blue { color: #00c6ff; }
+.icon.green { color: #00bfa6; }
+.icon.orange { color: #ffb347; }
+.icon.purple { color: #b388ff; }
+/* Cards & Tables */
+.card-dark {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.card-dark-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
+  color: #00c6ff;
+  font-weight: 600;
+}
+.dark-table th {
+  color: #8fd3f4;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.dark-table td {
+  color: #d0d0d0;
+  font-size: 0.9rem;
+}
+.dark-table tr:hover { background: rgba(255,255,255,0.05); }
+/* Status Badges */
+.badge {
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 5px 10px;
+}
+.status-approved { background: #00bfa6; color: #fff; }
+.status-pending { background: #ffb347; color: #111; }
+.status-rejected { background: #dc3545; color: #fff; }
+/* Responsive */
+@media (max-width: 992px) {
+  .sidebar { width: 200px; }
+  .main-content { margin-left: 200px; }
+}
+@media (max-width: 768px) {
+  .sidebar { position: absolute; left: -100%; transition: 0.4s; }
+  .sidebar.active { left: 0; }
+  .main-content { margin-left: 0; padding: 20px; }
+}
+</style>
 {% endblock %}
-
