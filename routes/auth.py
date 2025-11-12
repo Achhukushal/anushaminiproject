@@ -10,7 +10,6 @@ auth_bp = Blueprint('auth', __name__)
 # ==============================
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    # If already logged in, redirect to dashboard based on role
     if current_user.is_authenticated:
         if current_user.role == 'admin':
             return redirect(url_for('admin.dashboard'))
@@ -19,7 +18,6 @@ def login():
         elif current_user.role == 'parent':
             return redirect(url_for('parent.dashboard'))
 
-    # Handle POST request (login form submission)
     if request.method == 'POST':
         role = request.form.get('role')
         email = request.form.get('email')
@@ -44,11 +42,10 @@ def login():
                 if staff and check_password_hash(staff.password, password):
                     user = User.query.filter_by(email=staff.email, role='staff').first()
 
-                    # Auto-create User entry for staff if not exists
                     if not user:
                         user = User(
                             email=staff.email,
-                            password=staff.password,  # already hashed
+                            password=staff.password,
                             name=staff.name,
                             role='staff',
                             status='approved'
@@ -76,7 +73,6 @@ def login():
         # VALIDATION AND REDIRECT
         # ----------------------------
         if user:
-            # Skip staff (already logged in above)
             if role == 'staff':
                 pass
             elif check_password_hash(user.password, password):
@@ -95,8 +91,8 @@ def login():
         elif role not in ['staff']:
             flash('Invalid credentials. Please try again.', 'danger')
 
-    # Render login page on GET request or failed POST
     return render_template('auth/login.html')
+
 
 # ==============================
 # REGISTER ROUTE
@@ -114,17 +110,14 @@ def register():
         address = request.form.get('address')
         phone = request.form.get('phone')
 
-        # Password confirmation
         if password != confirm_password:
             flash('Passwords do not match.', 'danger')
             return render_template('auth/register.html')
 
-        # Duplicate email check
         if User.query.filter_by(email=email).first():
             flash('Email already registered.', 'danger')
             return render_template('auth/register.html')
 
-        # Create new parent (pending approval)
         hashed_password = generate_password_hash(password)
         new_user = User(
             email=email,
@@ -143,6 +136,72 @@ def register():
         return redirect(url_for('auth.login'))
 
     return render_template('auth/register.html')
+
+
+# ==============================
+# FORGOT PASSWORD ROUTE
+# ==============================
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """
+    Allows users to reset their password directly by selecting role
+    and providing Email/Staff ID/Parent ID.
+    """
+    if request.method == 'POST':
+        role = request.form.get('role')
+        identifier = request.form.get('identifier').strip()
+        new_password = request.form.get('new_password')
+
+        hashed_pw = generate_password_hash(new_password)
+        user = None
+
+        # Debug info (optional)
+        print(f"[DEBUG] Forgot Password: Role={role}, Identifier={identifier}")
+
+        # ----------------------------
+        # ADMIN PASSWORD RESET
+        # ----------------------------
+        if role == 'admin':
+            user = User.query.filter_by(email=identifier, role='admin').first()
+
+        # ----------------------------
+        # STAFF PASSWORD RESET
+        # ----------------------------
+        elif role == 'staff':
+            staff = Staff.query.filter_by(staff_id=identifier).first()
+            if staff:
+                staff.password = hashed_pw
+                db.session.commit()
+                flash(f"Password updated successfully for Staff ID: {identifier}", 'success')
+                return redirect(url_for('auth.login'))
+            else:
+                flash('No staff found with that Staff ID.', 'danger')
+                return render_template('auth/forgot_password.html')
+
+        # ----------------------------
+        # PARENT PASSWORD RESET
+        # ----------------------------
+        elif role == 'parent':
+            # ⚠ Parent may not have 'parent_id' until admin approval
+            # So we’ll check both parent_id and email
+            user = User.query.filter(
+                (User.parent_id == identifier) | (User.email == identifier),
+                User.role == 'parent'
+            ).first()
+
+        # ----------------------------
+        # UPDATE PASSWORD FOR ADMIN / PARENT
+        # ----------------------------
+        if user:
+            user.password = hashed_pw
+            db.session.commit()
+            flash('Password reset successful! You can now log in.', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash('User not found. Please check your details.', 'danger')
+
+    return render_template('auth/forgot_password.html')
+
 
 # ==============================
 # LOGOUT ROUTE

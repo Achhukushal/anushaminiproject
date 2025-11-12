@@ -3,6 +3,66 @@
 {% block title %}My Children{% endblock %}
 
 {% block content %}
+<style>
+/* ---------- Background for Admin Dashboard ---------- */
+body {
+    background: 
+        linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+        url("{{ url_for('static', filename='images/adoption_bg4.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    margin: 0;
+}
+
+/* ---------- Card Enhancements ---------- */
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+.card-header {
+    background: rgba(35, 140, 164, 0.1);
+    border-bottom: 2px solid rgba(35, 140, 164, 0.3);
+    color: #205295;
+    font-weight: 600;
+}
+
+/* ---------- Title ---------- */
+h2 {
+    color: #205295;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* ---------- Tables ---------- */
+.table {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.table thead {
+    background: rgba(35, 140, 164, 0.1);
+}
+
+/* ---------- Scrollbar (Optional Polished Look) ---------- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(35, 140, 164, 0.4);
+    border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(35, 140, 164, 0.7);
+}
+</style>
 <h2 class="mb-4"><i class="bi bi-heart"></i> My Children</h2>
 
 <div class="row">

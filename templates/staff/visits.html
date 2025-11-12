@@ -3,8 +3,72 @@
 {% block title %}Visits{% endblock %}
 
 {% block content %}
+<style>
+/* ---------- Background for Admin Dashboard ---------- */
+body {
+    background: 
+        linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+        url("{{ url_for('static', filename='images/adoption_bg4.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    margin: 0;
+}
+
+/* ---------- Card Enhancements ---------- */
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+.card-header {
+    background: rgba(35, 140, 164, 0.1);
+    border-bottom: 2px solid rgba(35, 140, 164, 0.3);
+    color: #205295;
+    font-weight: 600;
+}
+
+/* ---------- Title ---------- */
+h2 {
+    color: #205295;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* ---------- Tables ---------- */
+.table {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.table thead {
+    background: rgba(35, 140, 164, 0.1);
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(35, 140, 164, 0.4);
+    border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(35, 140, 164, 0.7);
+}
+</style>
+
 <h2 class="mb-4"><i class="bi bi-calendar-check"></i> Home Visits</h2>
 
+<!-- =======================
+     SCHEDULE NEW VISIT FORM
+     ======================= -->
 <div class="card mb-4">
     <div class="card-header">
         <h5>Schedule New Visit</h5>
@@ -12,7 +76,7 @@
     <div class="card-body">
         <form method="POST" action="{{ url_for('staff.add_visit') }}">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <label class="form-label">Parent</label>
                     <select class="form-select" name="parent_id" required>
                         <option value="">Select Parent</option>
@@ -21,33 +85,34 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-5">
                     <label class="form-label">Visit Date</label>
                     <input type="date" class="form-control" name="visit_date" required>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Remarks</label>
-                    <input type="text" class="form-control" name="remarks">
-                </div>
-                <div class="col-md-1">
-                    <label class="form-label">&nbsp;</label>
-                    <button type="submit" class="btn btn-primary w-100">Schedule</button>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary ">Schedule</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
+<!-- =======================
+     FILTER BUTTONS
+     ======================= -->
 <div class="mb-3">
     <a href="{{ url_for('staff.view_visits', status='all') }}" class="btn btn-sm btn-outline-primary">All</a>
     <a href="{{ url_for('staff.view_visits', status='scheduled') }}" class="btn btn-sm btn-outline-warning">Scheduled</a>
     <a href="{{ url_for('staff.view_visits', status='completed') }}" class="btn btn-sm btn-outline-success">Completed</a>
 </div>
 
+<!-- =======================
+     VISITS TABLE
+     ======================= -->
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-striped align-middle">
                 <thead>
                     <tr>
                         <th>Parent</th>
@@ -66,7 +131,9 @@
                         <td>{{ visit.remarks or '-' }}</td>
                         <td>
                             {% if visit.status == 'scheduled' %}
-                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#completeModal{{ visit.id }}">Complete</button>
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#completeModal{{ visit.id }}">
+                                Complete
+                            </button>
                             {% endif %}
                         </td>
                     </tr>
@@ -77,6 +144,9 @@
     </div>
 </div>
 
+<!-- =======================
+     COMPLETE VISIT MODALS
+     ======================= -->
 {% for visit in visits %}
 {% if visit.status == 'scheduled' %}
 <div class="modal fade" id="completeModal{{ visit.id }}" tabindex="-1">
@@ -90,7 +160,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Remarks</label>
-                        <textarea class="form-control" name="remarks" rows="3">{{ visit.remarks or '' }}</textarea>
+                        <textarea class="form-control" name="remarks" rows="3" placeholder="Enter observations or notes from the visit"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Photos (Optional)</label>
@@ -108,4 +178,3 @@
 {% endif %}
 {% endfor %}
 {% endblock %}
-

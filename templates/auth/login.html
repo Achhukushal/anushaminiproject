@@ -6,10 +6,16 @@
 <style>
 /* ---------- Background ---------- */
 body {
-    background: linear-gradient(135deg, #b5d3f3, #e6e9f0);
     font-family: 'Poppins', sans-serif;
     color: #333;
     margin: 0;
+
+    /* 👇 Add your image from static/images folder */
+    background: 
+        linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.65)),
+        url("{{ url_for('static', filename='images/adoption_bg1.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 /* ---------- Center Container ---------- */
@@ -23,17 +29,18 @@ body {
 
 /* ---------- Card ---------- */
 .card {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(12px);
     border-radius: 16px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     width: 100%;
     max-width: 430px;
     padding: 40px 35px;
-    transition: box-shadow 0.3s ease;
+    transition: all 0.3s ease;
 }
 .card:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.18);
 }
 
 /* ---------- Title ---------- */
@@ -71,6 +78,7 @@ body {
 }
 .btn-primary:hover {
     background-color: #2c6dc8;
+    transform: scale(1.03);
 }
 
 /* ---------- Links ---------- */
@@ -136,6 +144,11 @@ a:hover {
                 <label class="form-label">Password</label>
                 <input type="password" class="form-control" name="password" required>
             </div>
+            <div class="mb-3 text-end">
+    <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none small">
+        Forgot Password?
+    </a>
+</div>
 
             <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
         </form>

@@ -1,55 +1,296 @@
 {% extends "base.html" %}
 
-{% block title %}Uploads{% endblock %}
+{% block title %}Uploads - Adoption System{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="bi bi-upload"></i> Document Uploads</h2>
+<style>
+/* ---------- Background for Admin Dashboard ---------- */
+body {
+    background: 
+        linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+        url("{{ url_for('static', filename='images/adoption_bg4.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    margin: 0;
+}
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h5>Upload New Document</h5>
-    </div>
-    <div class="card-body">
-        <form method="POST" enctype="multipart/form-data">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Child</label>
-                    <select class="form-select" name="child_id" required>
-                        <option value="">Select Child</option>
-                        {% for child in children %}
-                        <option value="{{ child.id }}">{{ child.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Document Type</label>
-                    <select class="form-select" name="upload_type" required>
-                        <option value="">Select Type</option>
-                        <option value="health">Health Check-up</option>
-                        <option value="vaccination">Vaccination Update</option>
-                        <option value="school">School Progress Report</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">File</label>
-                    <input type="file" class="form-control" name="file" accept=".pdf,.jpg,.jpeg,.png" required>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">&nbsp;</label>
-                    <button type="submit" class="btn btn-primary w-100">Upload</button>
-                </div>
+/* ---------- Card Enhancements ---------- */
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+.card-header {
+    background: rgba(35, 140, 164, 0.1);
+    border-bottom: 2px solid rgba(35, 140, 164, 0.3);
+    color: #205295;
+    font-weight: 600;
+}
+
+/* ---------- Title ---------- */
+h2 {
+    color: #205295;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* ---------- Tables ---------- */
+.table {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.table thead {
+    background: rgba(35, 140, 164, 0.1);
+}
+
+/* ---------- Scrollbar (Optional Polished Look) ---------- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(35, 140, 164, 0.4);
+    border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(35, 140, 164, 0.7);
+}
+</style>
+<h2 class="mb-4"><i class="bi bi-upload"></i> Parent Uploads & Reports</h2>
+
+<div class="accordion" id="uploadAccordion">
+
+    <!-- Monthly Photo Update -->
+    <div class="accordion-item mb-3">
+        <h2 class="accordion-header" id="headingMonthly">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMonthly">
+                📅 Monthly Photo Update
+            </button>
+        </h2>
+        <div id="collapseMonthly" class="accordion-collapse collapse show" data-bs-parent="#uploadAccordion">
+            <div class="accordion-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="monthly_photo">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Child</label>
+                            <select class="form-select" name="child_id" required>
+                                <option value="">Select Child</option>
+                                {% for child in children %}
+                                <option value="{{ child.id }}">{{ child.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Photo File</label>
+                            <input type="file" class="form-control" name="file" accept=".jpg,.jpeg,.png" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Caption / Short Note</label>
+                            <input type="text" class="form-control" name="caption" placeholder="e.g., Child playing at home">
+                        </div>
+                        <div class="col-md-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary">Upload Monthly Photo</button>
+                        </div>
+                    </div>
+                </form>
+                <small class="text-muted d-block mt-2">Please upload one genuine photo every month to verify the child's welfare.</small>
             </div>
-        </form>
+        </div>
+    </div>
+
+    <!-- Health & Vaccination Report -->
+    <div class="accordion-item mb-3">
+        <h2 class="accordion-header" id="headingHealth">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHealth">
+                🩺 Health & Vaccination Report
+            </button>
+        </h2>
+        <div id="collapseHealth" class="accordion-collapse collapse" data-bs-parent="#uploadAccordion">
+            <div class="accordion-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="health_report">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Child</label>
+                            <select class="form-select" name="child_id" required>
+                                <option value="">Select Child</option>
+                                {% for child in children %}
+                                <option value="{{ child.id }}">{{ child.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Report Type</label>
+                            <select class="form-select" name="report_category" required>
+                                <option value="">Select</option>
+                                <option value="health_checkup">Health Check-up</option>
+                                <option value="vaccination">Vaccination Update</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Upload File</label>
+                            <input type="file" class="form-control" name="file" accept=".pdf,.jpg,.jpeg,.png" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Hospital / Doctor Name (optional)</label>
+                            <input type="text" class="form-control" name="hospital" placeholder="e.g., Dr. Sharma Clinic">
+                        </div>
+                        <div class="col-md-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary">Upload Health Report</button>
+                        </div>
+                    </div>
+                </form>
+                <small class="text-muted d-block mt-2">Upload the latest health or vaccination report (required once a year).</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Educational Progress -->
+    <div class="accordion-item mb-3">
+        <h2 class="accordion-header" id="headingEducation">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEducation">
+                🏫 Educational Progress
+            </button>
+        </h2>
+        <div id="collapseEducation" class="accordion-collapse collapse" data-bs-parent="#uploadAccordion">
+            <div class="accordion-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="education_report">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Child</label>
+                            <select class="form-select" name="child_id" required>
+                                <option value="">Select Child</option>
+                                {% for child in children %}
+                                <option value="{{ child.id }}">{{ child.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Upload File</label>
+                            <input type="file" class="form-control" name="file" accept=".pdf,.jpg,.jpeg,.png" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">School Name (optional)</label>
+                            <input type="text" class="form-control" name="school" placeholder="e.g., Sunshine Public School">
+                        </div>
+                        <div class="col-md-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary">Upload Educational Report</button>
+                        </div>
+                    </div>
+                </form>
+                <small class="text-muted d-block mt-2">Upload the child's latest report card or school progress report.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Environment Photo -->
+    <div class="accordion-item mb-3">
+        <h2 class="accordion-header" id="headingHome">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHome">
+                🏠 Home Environment Photo
+            </button>
+        </h2>
+        <div id="collapseHome" class="accordion-collapse collapse" data-bs-parent="#uploadAccordion">
+            <div class="accordion-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="home_environment">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Child</label>
+                            <select class="form-select" name="child_id" required>
+                                <option value="">Select Child</option>
+                                {% for child in children %}
+                                <option value="{{ child.id }}">{{ child.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Upload Photos</label>
+                            <input type="file" class="form-control" name="file" accept=".jpg,.jpeg,.png" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" name="description" placeholder="e.g., Child’s room or play area">
+                        </div>
+                        <div class="col-md-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary">Upload Home Photo</button>
+                        </div>
+                    </div>
+                </form>
+                <small class="text-muted d-block mt-2">Upload photos showing the child's living space and family surroundings.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Special Report -->
+    <div class="accordion-item mb-3">
+        <h2 class="accordion-header" id="headingSpecial">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpecial">
+                🧩 Special Report (Optional)
+            </button>
+        </h2>
+        <div id="collapseSpecial" class="accordion-collapse collapse" data-bs-parent="#uploadAccordion">
+            <div class="accordion-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="special_report">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Child</label>
+                            <select class="form-select" name="child_id" required>
+                                <option value="">Select Child</option>
+                                {% for child in children %}
+                                <option value="{{ child.id }}">{{ child.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Upload File</label>
+                            <input type="file" class="form-control" name="file" accept=".pdf,.jpg,.jpeg,.png">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" name="description" placeholder="e.g., Achievement or Counselling Report">
+                        </div>
+                        <div class="col-md-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary">Upload Special Report</button>
+                        </div>
+                    </div>
+                </form>
+                <small class="text-muted d-block mt-2">Optional: Upload any achievement, therapy, or special update about the child.</small>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="card">
+<!-- Declaration -->
+<div class="card mt-4">
+    <div class="card-body">
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="declaration" required>
+            <label class="form-check-label" for="declaration">
+                I confirm that all uploaded photos and documents are genuine and recent. I understand that false uploads may result in legal action.
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- Upload History Table -->
+<div class="card mt-4">
     <div class="card-header">
-        <h5>Upload History</h5>
+        <h5><i class="bi bi-clock-history"></i> Upload History</h5>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-striped align-middle">
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -57,16 +298,20 @@
                         <th>Upload Date</th>
                         <th>Status</th>
                         <th>Feedback</th>
-                        <th>Actions</th>
+                        <th>View</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for upload in uploads %}
                     <tr>
-                        <td><span class="badge bg-info">{{ upload.upload_type }}</span></td>
+                        <td><span class="badge bg-info">{{ upload.upload_type.replace('_', ' ').title() }}</span></td>
                         <td>{{ upload.child.name }}</td>
                         <td>{{ upload.upload_date.strftime('%Y-%m-%d') }}</td>
-                        <td><span class="badge bg-{{ 'success' if upload.status == 'verified' else 'danger' if upload.status == 'rejected' else 'warning' }}">{{ upload.status }}</span></td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if upload.status == 'verified' else 'danger' if upload.status == 'rejected' else 'warning' }}">
+                                {{ upload.status }}
+                            </span>
+                        </td>
                         <td>{{ upload.feedback or '-' }}</td>
                         <td>
                             <a href="{{ url_for('static', filename='../uploads/' + upload.file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
@@ -78,5 +323,5 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
+{% endblock %}

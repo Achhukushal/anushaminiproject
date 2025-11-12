@@ -11,7 +11,7 @@
                     <i class="bi bi-person-plus-fill text-primary"></i> Parent Registration
                 </h2>
                 
-                <form method="POST">
+                <form method="POST" onsubmit="return validateForm()">
                     <div class="mb-3">
                         <label class="form-label">Full Name</label>
                         <input type="text" class="form-control" name="name" required>
@@ -42,6 +42,25 @@
                         <input type="password" class="form-control" name="confirm_password" required>
                     </div>
 
+                    <!-- Terms and Conditions Section -->
+                    <div class="border rounded p-3 mb-3 bg-light">
+                        <h5 class="text-center mb-3"><i class="bi bi-file-earmark-text"></i> Terms & Conditions</h5>
+                        <p class="small mb-1">By registering on this Adoption System, I agree that:</p>
+                        <ul class="small">
+                            <li>All details and documents I provide are <strong>true, accurate, and genuine</strong> to the best of my knowledge.</li>
+                            <li>I understand that <strong>false or misleading information</strong> will lead to <strong>immediate rejection</strong>, <strong>account suspension</strong>, and may invite <strong>legal action</strong> as per Indian law.</li>
+                            <li>I understand that this portal records <strong>digital logs and uploaded documents</strong> as official evidence for verification or investigation.</li>
+                            <li>I will <strong>not misuse</strong> this system or submit fraudulent documents for any purpose.</li>
+                        </ul>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="agreeCheckbox" required>
+                            <label class="form-check-label" for="agreeCheckbox">
+                                I have read and agree to the Terms & Conditions.
+                            </label>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
                 </form>
 
@@ -52,5 +71,15 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
+<script>
+function validateForm() {
+    const checkbox = document.getElementById('agreeCheckbox');
+    if (!checkbox.checked) {
+        alert('Please agree to the Terms & Conditions before submitting.');
+        return false;
+    }
+    return true;
+}
+</script>
+{% endblock %}
